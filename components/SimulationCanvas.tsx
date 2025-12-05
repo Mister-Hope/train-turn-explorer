@@ -32,7 +32,10 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
 
     // --- Configuration ---
     const centerX = width / 2;
-    const groundY = height * 0.85;
+
+    // Adjusted ground position to be higher (approx 2/3 down the screen)
+    // Previously 0.85, now 0.70 to keep train visible on smaller screens
+    const groundY = height * 0.7;
 
     const trackWidth = 240;
     const railHeight = 40;
@@ -71,14 +74,13 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
     // Local Sleeper: x from -40 to trackWidth+40, y from 0 to 12.
     // We want the bottom corners (y=12).
     // Transformation: x' = x cos a + y sin a, y' = -x sin a + y cos a
-    // Note: This matches the rotation `rotate(-angleRad)`.
 
     const cosA = Math.cos(angleRad);
     const sinA = Math.sin(angleRad);
 
     // Left Sleeper Bottom Corner (Local: -40, 12)
     const p1x = -40 * cosA + 12 * sinA;
-    const p1y = 40 * sinA + 12 * cosA; // -(-40)*sin = 40*sin
+    const p1y = 40 * sinA + 12 * cosA;
 
     // Right Sleeper Bottom Corner (Local: trackWidth+40, 12)
     const wExt = trackWidth + 40;
@@ -98,7 +100,7 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
 
     ctx.fillStyle = "#fdba74"; // Sand color
     ctx.fill();
-    // No stroke as requested
+    // No stroke
 
     // --- Rotate for Track System ---
     ctx.rotate(-angleRad);
@@ -109,7 +111,6 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
 
     // --- Rails ---
     const drawRail = (x: number) => {
-      // Changed to Silver (#cbd5e1)
       ctx.fillStyle = "#cbd5e1";
       ctx.strokeStyle = "#94a3b8";
       ctx.lineWidth = 1;
@@ -316,9 +317,6 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
 
       // 3. Flange Force
       const fNewtons = physics.flangeForce;
-      // In physics.ts, Positive F_flange means Down-Slope/Inwards/Left force.
-      // Canvas X axis is along slope to the Right.
-      // So Physics Positive (+F) corresponds to Canvas Negative X (-vecX).
 
       if (Math.abs(fNewtons) > 100) {
         const fMag = Math.abs(fNewtons) * forceScale;
@@ -329,24 +327,19 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
         let fVecX = 0;
 
         if (fNewtons > 0) {
-          // Fast Case (Positive Force = Pointing Left/Down-slope)
           fVecX = -fMag;
         } else {
-          // Slow Case (Negative Force = Pointing Right/Up-slope)
           fVecX = fMag;
         }
 
         if (!isConcurrent) {
           fOriginY = axleCenterY;
           if (fNewtons > 0) {
-            // Fast: Force from Outer Rail (Right) pushing In (Left)
             fOriginX = trackWidth;
           } else {
-            // Slow: Force from Inner Rail (Left) pushing Out (Right)
             fOriginX = 0;
           }
         } else {
-          // Concurrent mode: Draw from Center of Mass
           fOriginX = comX;
           fOriginY = comY;
         }
@@ -391,7 +384,6 @@ const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
       ctx.fillStyle = "#0f172a";
       ctx.font = "bold 16px sans-serif";
       ctx.textBaseline = "middle";
-      // Changed text from "圆心方向" to "圆周平面"
       ctx.fillText("圆周平面", 0, -25);
 
       ctx.restore();

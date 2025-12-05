@@ -4,6 +4,7 @@ import { calculatePhysics } from "./utils/physics";
 import ControlPanel from "./components/ControlPanel";
 import SimulationCanvas from "./components/SimulationCanvas";
 import StatusCard from "./components/StatusCard";
+import Latex from "./components/Latex";
 
 const App: React.FC = () => {
   const [state, setState] = useState<SimulationState>({
@@ -24,17 +25,18 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-base">
+    <div className="h-screen bg-slate-50 flex flex-col font-sans text-base overflow-hidden">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-8 py-5 flex items-center justify-start shadow-sm z-10">
-        <h1 className="text-3xl font-bold text-slate-800">火车转弯物理模型</h1>
+      <header className="bg-white border-b border-slate-200 px-6 py-4 flex-shrink-0 flex items-center justify-start shadow-sm z-10">
+        <h1 className="text-2xl font-bold text-slate-800">火车转弯物理模型</h1>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 md:p-8 overflow-hidden flex flex-col lg:flex-row gap-8">
+      <main className="flex-1 p-4 md:p-6 overflow-hidden flex flex-col lg:flex-row gap-6">
         {/* Left Column: Controls & Feedback */}
-        <div className="w-full lg:w-1/3 min-w-[360px] flex flex-col gap-6">
-          {/* Feedback Section (Top) */}
+        {/* Fixed width on large screens for stability, flex column for internal scrolling */}
+        <div className="w-full lg:w-[340px] flex-shrink-0 flex flex-col gap-4 h-full overflow-hidden">
+          {/* Feedback Section (Fixed at top of column) */}
           <div className="flex-shrink-0">
             <StatusCard
               status={physics.status}
@@ -42,7 +44,7 @@ const App: React.FC = () => {
             />
           </div>
 
-          {/* Control Panel Section (Bottom) */}
+          {/* Control Panel Section (Scrollable) */}
           <div className="flex-1 min-h-0">
             <ControlPanel
               state={state}
@@ -53,11 +55,11 @@ const App: React.FC = () => {
         </div>
 
         {/* Right Column: Visualization */}
-        <div className="w-full lg:w-2/3 flex flex-col gap-2">
+        <div className="flex-1 h-full min-w-0 flex flex-col gap-2 relative">
           <SimulationCanvas state={state} physics={physics} />
 
-          <div className="text-center text-slate-500 text-base mt-2">
-            * 视图：火车尾部横截面 | 红色圆点：重心 (Center of Mass)
+          <div className="absolute bottom-2 left-0 w-full text-center text-slate-500 text-sm pointer-events-none">
+            视图：火车尾部横截面 | 红色圆点：重心
           </div>
         </div>
       </main>
